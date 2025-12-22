@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: crm-app
+  labels:
+    app: crm-db
+    tier: database
+spec:
+  clusterIP: None
+  selector:
+    app: crm-db
+    tier: database
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+

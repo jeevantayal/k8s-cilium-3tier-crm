@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: crm-app-service
+  namespace: crm-app
+  labels:
+    app: crm-app
+    tier: application
+spec:
+  type: ClusterIP
+  selector:
+    app: crm-app
+    tier: application
+  ports:
+  - port: 5000
+    targetPort: 5000
+    protocol: TCP
+    name: http
+

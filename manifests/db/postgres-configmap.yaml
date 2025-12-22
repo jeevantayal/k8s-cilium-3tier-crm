@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: crm-app
+  labels:
+    app: crm-db
+    tier: database
+data:
+  POSTGRES_DB: crmdb
+  POSTGRES_USER: crmuser
+  POSTGRES_PASSWORD: crmpass123
+  PGDATA: /var/lib/postgresql/data/pgdata
+

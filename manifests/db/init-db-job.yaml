@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-init
+  namespace: crm-app
+  labels:
+    app: crm-db
+    tier: database
+spec:
+  template:
+    metadata:
+      labels:
+        app: crm-db-init
+        tier: database
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: init-db
+        image: postgres:15-alpine
+        command:
+        - /bin/sh
+        - -c
+        - |
+          until pg_isready -h postgres-service.crm-app.svc.cluster.local -U crmuser -d crmdb; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+          PGPASSWORD=crmpass123 psql -h postgres-service.crm-app.svc.cluster.local -U crmuser -d crmdb <<EOF
+          CREATE TABLE IF NOT EXISTS customers (
+              id SERIAL PRIMARY KEY,
+              name VARCHAR(100) NOT NULL,
+              email VARCHAR(100) UNIQUE NOT NULL,
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+          INSERT INTO customers (name, email) VALUES 
+          ('John Doe', 'john.doe@example.com'),
+          ('Jane Smith', 'jane.smith@example.com')
+          ON CONFLICT (email) DO NOTHING;
+          EOF
+

@@ -1,0 +1,134 @@
+---
+# Default deny all traffic in the namespace
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: crm-app
+spec:
+  description: "Default deny all traffic - zero trust model"
+  endpointSelector: {}
+    # Empty selector matches ALL pods in the namespace
+  # No ingress rules = deny all incoming traffic
+  # No egress rules = deny all outgoing traffic
+  # Note: More specific policies below will override this for allowed traffic
+---
+# Allow external access to Web tier (port 80)
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-external-to-web
+  namespace: crm-app
+spec:
+  description: "Allow anyone (external) to access Web tier on port 80"
+  endpointSelector:
+    matchLabels:
+      app: crm-web
+      tier: web
+  ingress:
+  - fromEntities:
+    - world
+    - cluster
+    toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP
+---
+# Allow Web tier to access App tier (port 5000)
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-web-to-app
+  namespace: crm-app
+spec:
+  description: "Allow Web tier to access App tier on port 5000"
+  endpointSelector:
+    matchLabels:
+      app: crm-app
+      tier: application
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: crm-web
+        tier: web
+    toPorts:
+    - ports:
+      - port: "5000"
+        protocol: TCP
+---
+# Allow App tier to access DB tier (port 5432)
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-app-to-db
+  namespace: crm-app
+spec:
+  description: "Allow App tier to access DB tier on port 5432"
+  endpointSelector:
+    matchLabels:
+      app: crm-db
+      tier: database
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: crm-app
+        tier: application
+    toPorts:
+    - ports:
+      - port: "5432"
+        protocol: TCP
+---
+# Allow DNS resolution for all pods
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: crm-app
+spec:
+  description: "Allow all pods to resolve DNS queries"
+  endpointSelector: {}
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: kube-system
+        k8s:k8s-app: kube-dns
+    toPorts:
+    - ports:
+      - port: "53"
+        protocol: UDP
+      - port: "53"
+        protocol: TCP
+  - toFQDNs:
+    - matchPattern: "*.cluster.local"
+---
+# Allow StatefulSet pods to communicate with each other for replication
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-db-replication
+  namespace: crm-app
+spec:
+  description: "Allow DB pods to communicate with each other for replication"
+  endpointSelector:
+    matchLabels:
+      app: crm-db
+      tier: database
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        app: crm-db
+        tier: database
+    toPorts:
+    - ports:
+      - port: "5432"
+        protocol: TCP
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: crm-db
+        tier: database
+    toPorts:
+    - ports:
+      - port: "5432"
+        protocol: TCP
+
