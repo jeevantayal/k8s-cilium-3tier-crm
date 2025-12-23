@@ -1,0 +1,18 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-web-egress-to-app
+  namespace: crm-app
+spec:
+  endpointSelector:
+    matchLabels:
+      app: crm-web
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: crm-app
+    toPorts:
+    - ports:
+      - port: "5000"
+        protocol: TCP
+

@@ -213,7 +213,7 @@ verify_deployment() {
     
     if [ -n "$WEB_POD" ]; then
         print_info "Testing web pod health endpoint..."
-        kubectl exec -n crm-app "$WEB_POD" -- wget -qO- http://localhost/ || print_warning "Web health check failed"
+        kubectl exec -n crm-app "$WEB_POD" -- wget -qO- http://127.0.0.1/healthy || print_warning "Web health check failed"
         
         print_info "Testing app service connectivity from web pod..."
         kubectl exec -n crm-app "$WEB_POD" -- wget -qO- http://crm-app-service.crm-app.svc.cluster.local:5000/health || print_warning "App connectivity test failed"
