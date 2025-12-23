@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
       - name: crm-app
-        image: python:3.11-slim
+        image: crm-app:1.0
+        imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
         args:
         - -c
