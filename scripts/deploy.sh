@@ -182,6 +182,7 @@ apply_security_policies() {
     print_info "Applying CiliumNetworkPolicy security policies..."
     
     kubectl apply -f "$MANIFESTS_DIR/security/cilium-network-policies.yaml"
+    kubectl apply -f "$MANIFESTS_DIR/security/allow-web-egress-to-app.yaml"
     
     print_success "Security policies applied successfully"
 }
