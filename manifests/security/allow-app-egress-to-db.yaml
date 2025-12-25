@@ -1,0 +1,21 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-app-egress-to-db
+  namespace: crm-app
+spec:
+  description: Allow App tier to access DB tier on port 5432
+  endpointSelector:
+    matchLabels:
+      app: crm-app
+      tier: application
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        app: crm-db
+        tier: database
+    toPorts:
+    - ports:
+      - port: "5432"
+        protocol: TCP
+

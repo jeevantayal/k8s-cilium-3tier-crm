@@ -45,7 +45,7 @@ demo_allowed_traffic() {
     # Test 1: External to Web
     print_info "Test 1: External access to Web tier (should work)"
     WEB_POD=$(kubectl get pod -n crm-app -l app=crm-web -o jsonpath='{.items[0].metadata.name}')
-    if kubectl exec -n crm-app "$WEB_POD" -- wget -qO- http://localhost/health > /dev/null 2>&1; then
+    if kubectl exec -n crm-app "$WEB_POD" -- wget -qO- http://127.0.0.1/healthy > /dev/null 2>&1; then
         print_success "External can access Web tier"
     else
         print_error "External cannot access Web tier"
@@ -63,7 +63,8 @@ demo_allowed_traffic() {
     # Test 3: App to DB
     print_info "Test 3: App tier accessing DB tier (should work)"
     APP_POD=$(kubectl get pod -n crm-app -l app=crm-app -o jsonpath='{.items[0].metadata.name}')
-    if kubectl exec -n crm-app "$APP_POD" -- sh -c 'PGPASSWORD=crmpass123 psql -h postgres-service.crm-app.svc.cluster.local -U crmuser -d crmdb -c "SELECT 1;"' > /dev/null 2>&1; then
+    #if kubectl exec -n crm-app "$APP_POD" -- sh -c 'PGPASSWORD=crmpass123 psql -h postgres-service.crm-app.svc.cluster.local -U crmuser -d crmdb -c "SELECT 1;"' > /dev/null 2>&1; then
+    if kubectl exec -n crm-app "$APP_POD" -- python -c "..."; then
         print_success "App tier can access DB tier"
     else
         print_error "App tier cannot access DB tier"

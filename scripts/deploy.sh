@@ -114,6 +114,10 @@ EOF
     kind load docker-image crm-app:1.0 --name "$CLUSTER_NAME"
 }
 
+
+
+
+
 install_cilium() {
     print_info "Installing Cilium CNI..."
     
@@ -136,6 +140,12 @@ install_cilium() {
     print_success "Cilium installed successfully"
 }
 
+
+
+
+
+
+
 deploy_application() {
     print_info "Deploying CRM application..."
     
@@ -145,6 +155,10 @@ deploy_application() {
     print_info "Waiting for namespace to be ready..."
     sleep 2
     
+    echo "Process paused."; read -p "Press [Enter] to continue..."; echo "Resuming..."
+
+
+
     # Deploy DB tier
     print_info "Deploying database tier..."
     kubectl apply -f "$MANIFESTS_DIR/db/"
@@ -159,6 +173,14 @@ deploy_application() {
     sleep 5
     kubectl wait --for=condition=complete job/postgres-init -n crm-app --timeout=120s || true
     
+
+
+
+    echo "Process paused."; read -p "Press [Enter] to continue..."; echo "Resuming..."
+
+
+
+
     # Deploy App tier
     print_info "Deploying application tier..."
     kubectl apply -f "$MANIFESTS_DIR/app/"
@@ -167,6 +189,12 @@ deploy_application() {
     print_info "Waiting for application pods to be ready..."
     kubectl wait --for=condition=ready pod -l app=crm-app -n crm-app --timeout=300s || true
     
+ 
+
+    echo "Process paused."; read -p "Press [Enter] to continue..."; echo "Resuming..."
+
+
+
     # Deploy Web tier
     print_info "Deploying web tier..."
     kubectl apply -f "$MANIFESTS_DIR/web/"
@@ -176,6 +204,11 @@ deploy_application() {
     kubectl wait --for=condition=ready pod -l app=crm-web -n crm-app --timeout=300s || true
     
     print_success "Application deployed successfully"
+
+
+    echo "Process paused."; read -p "Press [Enter] to continue..."; echo "Resuming..."
+
+
 }
 
 apply_security_policies() {
@@ -183,6 +216,7 @@ apply_security_policies() {
     
     kubectl apply -f "$MANIFESTS_DIR/security/cilium-network-policies.yaml"
     kubectl apply -f "$MANIFESTS_DIR/security/allow-web-egress-to-app.yaml"
+    kubectl apply -f "$MANIFESTS_DIR/security/allow-app-egress-to-db.yaml"
     
     print_success "Security policies applied successfully"
 }
@@ -276,9 +310,15 @@ main() {
         deploy)
             check_prerequisites
             create_cluster
+            echo "Process paused."; read -p "Press [Enter] to continue..."; echo "Resuming..."
             install_cilium
+            echo "Process paused."; read -p "Press [Enter] to continue..."; echo "Resuming..."
             deploy_application
+
+            echo "Process paused."; read -p "Press [Enter] to continue..."; echo "Resuming..."
+
             apply_security_policies
+            echo "Process paused."; read -p "Press [Enter] to continue..."; echo "Resuming..."
             verify_deployment
             echo ""
             print_success "=== Deployment Complete ==="
